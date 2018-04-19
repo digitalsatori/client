@@ -12,7 +12,7 @@ from getpass import getpass
 import certifi
 from erlastic import Atom
 from tenacity import (retry, retry_if_exception_type, retry_unless_exception_type,
-                      stop_after_attempt, wait_exponential)
+                      stop_after_attempt, wait_exponential, before_sleep_log)
 
 import syncrypt
 from syncrypt import __project__, __version__
@@ -28,7 +28,7 @@ from .base import StorageBackend
 
 logger = logging.getLogger(__name__)
 
-BINARY_DEBUG = False
+BINARY_DEBUG = True
 
 NIL = Atom('nil')
 
@@ -792,9 +792,11 @@ class BinaryStorageManager(object):
                     await conn.disconnect()
                     break
 
-    @retry(retry=retry_if_exception_type() & retry_unless_exception_type(InvalidAuthentification),
-           stop=stop_after_attempt(3),
-           wait=wait_exponential(multiplier=1, max=10))
+    @retry(reraise=True,
+           retry=retry_if_exception_type() & retry_unless_exception_type(InvalidAuthentification),
+           stop=stop_after_attempt(5),
+           before_sleep=before_sleep_log(logger, logging.WARNING),
+           wait=wait_exponential(multiplier=3, max=60))
     async def acquire_connection(self, vault, skip_login=False):
         'return an available connection or block until one is free'
         if self._monitor_task is None:
