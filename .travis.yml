@@ -6,6 +6,8 @@ matrix:
     - os: linux
       python: 3.6
       env: DEPLOY_ARTIFACT=true
+    - os: linux
+      python: 3.7
     - os: osx
       sudo: required
       language: generic
@@ -20,6 +22,13 @@ matrix:
       # We need this to get builds running on older OS X versions.
       osx_image: xcode7.3
       env: PYTHON_VERSION=3.6.5 DEPLOY_ARTIFACT=true
+    - os: osx
+      sudo: required
+      language: generic
+      # This will build OS X 10.11 instead of default 10.12.
+      # We need this to get builds running on older OS X versions.
+      osx_image: xcode7.3
+      env: PYTHON_VERSION=3.7.0
 addons:
   apt:
     packages:
